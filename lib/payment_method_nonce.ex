@@ -3,26 +3,26 @@ defmodule Braintree.PaymentMethodNonce do
   Create a payment method nonce from an existing payment method token
   """
   @type t :: %__MODULE__{
-               consumed:                 boolean,
                default:                  String.t,
                description:              String.t,
+               nonce:                    String.t,
+               three_d_secure_info:      String.t,
+               type:                     String.t,
                details:                  Map.t,
                is_locked:                boolean,
-               nonce:                    String.t,
-               security_questions:       [],
-               three_d_secure_info:      String.t,
-               type:                     String.t
+               consumed:                 boolean,
+               security_questions:       []
              }
 
-  defstruct consumed:             false,
-            default:              nil,
+  defstruct default:              nil,
             description:          nil,
-            details:              nil,
-            is_locked:            false,
             nonce:                nil,
-            security_questions:   nil,
             three_d_secure_info:  nil,
-            type:                 nil
+            type:                 nil,
+            is_locked:            false,
+            details:              nil,
+            consumed:             false,
+            security_questions:   nil
 
   import Braintree.Util, only: [atomize: 1]
   alias Braintree.HTTP
