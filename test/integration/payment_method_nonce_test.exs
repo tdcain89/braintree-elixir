@@ -29,13 +29,13 @@ defmodule Braintree.Integration.PaymentMethodNonceTest do
 
     assert payment_method_nonce.type == "CreditCard"
   end
-  
+
   test "find/1 fails when invalid nonce provided" do
     {:error, error} = PaymentMethodNonce.find("bogus")
 
     assert error.message == "Token is invalid."
   end
-  
+
   test "find/1 succeeds when valid token provided" do
     {:ok, customer} = Customer.create(%{
       first_name: "Rick",
@@ -46,10 +46,10 @@ defmodule Braintree.Integration.PaymentMethodNonceTest do
         cvv: "100"
       }
     })
-    
+
     card = customer.credit_cards |> List.first
     {:ok, payment_method_nonce} = PaymentMethodNonce.create(card.token)
-      
+
     {:ok, found_nonce} = PaymentMethodNonce.find(payment_method_nonce.nonce)
 
     assert found_nonce.type == payment_method_nonce.type
