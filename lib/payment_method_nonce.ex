@@ -49,6 +49,26 @@ defmodule Braintree.PaymentMethodNonce do
     end
   end
   
+  @doc """
+  Find a payment method nonce, or return an error response if token invalid
+
+  ## Example
+
+      {:ok, payment_method} = Braintree.PaymentMethodNonce.find(token)
+      payment_method.type #CreditCard
+  """
+  @spec find(String.t) :: {:ok, t} | {:error, Error.t}
+  def find(nonce) do
+    case HTTP.get("payment_method_nonces/#{nonce}") do
+      {:ok, %{"payment_method_nonce" => payment_method_nonce}} ->
+        {:ok, construct(payment_method_nonce)}
+      {:error, %{"api_error_response" => error}} ->
+        {:error, Error.construct(error)}
+      {:error, :not_found} -> 
+        {:error, Error.construct(%{"message" => "Token is invalid."})}
+    end
+  end
+  
   def construct(map) do
     struct(__MODULE__, atomize(map))
   end

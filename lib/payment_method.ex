@@ -86,4 +86,82 @@ defmodule Braintree.PaymentMethod do
         {:error, Error.construct(error)}
     end
   end
+  
+  @doc """
+  Update a payment method record, or return an error response with after failed
+  validation.
+
+  ## Example
+
+      {:ok, customer} = Braintree.Customer.create(%{
+        first_name: "Jen",
+        last_name: "Smith"
+      })
+      
+      {:ok, credit_card} = Braintree.PaymentMethod.create(%{
+        customer_id: customer.id,
+        cardholder_name: "CH Name",
+        payment_method_nonce: Braintree.Testing.Nonces.transactable
+      })
+      
+      {:ok, payment_method} = Braintree.PaymentMethod.update(credit_card.token,
+        %{
+          cardholder_name: "NEW"
+        }
+      )
+      
+      payment_method.cardholder_name #NEW
+  """
+  @spec update(String.t, Map.t) :: {:ok, t} | {:error, Error.t}
+  def update(token, params \\ %{}) do
+    case HTTP.put("payment_methods/any/#{token}", %{payment_method: params}) do
+      {:ok, %{"credit_card" => credit_card}} ->
+        {:ok, CreditCard.construct(credit_card)}
+      {:error, %{"api_error_response" => error}} ->
+        {:error, Error.construct(error)}
+      {:error, :not_found} -> 
+        {:error, Error.construct(%{"message" => "Token is invalid."})}
+    end
+  end
+  
+  
+  @doc """
+  Delete a payment method record, or return an error response if token invalid
+
+  ## Example
+
+      {:ok, message} = Braintree.PaymentMethod.delete(token)
+      message #Success
+  """
+  @spec delete(String.t) :: {:ok, t} | {:error, Error.t}
+  def delete(token) do
+    case HTTP.delete("payment_methods/any/#{token}") do
+      {:ok, %{}} ->
+        {:ok, "Success"}
+      {:error, %{"api_error_response" => error}} ->
+        {:error, Error.construct(error)}
+      {:error, :not_found} -> 
+        {:error, Error.construct(%{"message" => "Token is invalid."})}
+    end
+  end
+  
+  @doc """
+  Find a payment method record, or return an error response if token invalid
+
+  ## Example
+
+      {:ok, payment_method} = Braintree.PaymentMethod.find(token)
+      payment_method.type #CreditCard
+  """
+  @spec find(String.t) :: {:ok, t} | {:error, Error.t}
+  def find(token) do
+    case HTTP.get("payment_methods/any/#{token}") do
+      {:ok, %{"credit_card" => credit_card}} ->
+        {:ok, CreditCard.construct(credit_card)}
+      {:error, %{"api_error_response" => error}} ->
+        {:error, Error.construct(error)}
+      {:error, :not_found} -> 
+        {:error, Error.construct(%{"message" => "Token is invalid."})}
+    end
+  end
 end
