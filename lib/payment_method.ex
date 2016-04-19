@@ -1,4 +1,7 @@
 defmodule Braintree.PaymentMethod do
+  @moduledoc """
+  Create, update, find and delete payment methods
+  """
   @type t :: %__MODULE__{
                bin:                      String.t,
                card_type:                String.t,
