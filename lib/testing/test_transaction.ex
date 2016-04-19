@@ -22,6 +22,7 @@ defmodule Braintree.Testing.TestTransaction do
   """
   @spec settle(String.t) :: {:ok, any} | {:error, Error.t}
   def settle(transaction_id) do
+    verify_environment(Mix.env)
     case HTTP.put("transactions/#{transaction_id}/settle", %{}) do
       {:ok, %{"transaction" => transaction}} ->
         {:ok, Transaction.construct(transaction)}
@@ -31,8 +32,53 @@ defmodule Braintree.Testing.TestTransaction do
         {:error, Error.construct(%{"message" => "Transaction ID is invalid."})}
     end
   end
-  
-  # TODO: settlement_confirmed
-  # TODO: settlement_declined
-  # TODO: verify testing environment
+
+  @doc """
+  Use a `transaction_id` to transition to settled_confirmed status
+
+  ## Example
+
+      {:ok, transaction} = TestTransaction.settlement_confirm(
+        transaction_id: "123")
+
+      transaction.status # "settlement_confirmed"
+  """
+  @spec settlement_confirm(String.t) :: {:ok, any} | {:error, Error.t}
+  def settlement_confirm(transaction_id) do
+    verify_environment(Mix.env)
+    case HTTP.put("transactions/#{transaction_id}/settlement_confirm", %{}) do
+      {:ok, %{"transaction" => transaction}} ->
+        {:ok, Transaction.construct(transaction)}
+      {:error, %{"api_error_response" => error}} ->
+        {:error, Error.construct(error)}
+      {:error, :not_found} ->
+        {:error, Error.construct(%{"message" => "Transaction ID is invalid."})}
+    end
+  end
+
+  @doc """
+  Use a `transaction_id` to transition to settlement_declined status
+
+  ## Example
+
+      {:ok, transaction} = TestTransaction.settlement_decline(
+        transaction_id: "123")
+
+      transaction.status # "settlement_declined"
+  """
+  @spec settlement_decline(String.t) :: {:ok, any} | {:error, Error.t}
+  def settlement_decline(transaction_id) do
+    verify_environment(Mix.env)
+    case HTTP.put("transactions/#{transaction_id}/settlement_decline", %{}) do
+      {:ok, %{"transaction" => transaction}} ->
+        {:ok, Transaction.construct(transaction)}
+      {:error, %{"api_error_response" => error}} ->
+        {:error, Error.construct(error)}
+      {:error, :not_found} ->
+        {:error, Error.construct(%{"message" => "Transaction ID is invalid."})}
+    end
+  end
+
+  defp verify_environment(:prod), do: raise "For test use only"
+  defp verify_environment(_), do: true
 end
