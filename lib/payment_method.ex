@@ -1,9 +1,4 @@
-defmodule Braintree.CreditCard do
-  @moduledoc """
-  CreditCard structs are not created directly, but are built within
-  responsees from other endpoints, such as `Braintree.Customer`.
-  """
-
+defmodule Braintree.PaymentMethod do
   @type t :: %__MODULE__{
                bin:                      String.t,
                card_type:                String.t,
@@ -60,9 +55,35 @@ defmodule Braintree.CreditCard do
             subscriptions:            [],
             verifications:            []
 
-  import Braintree.Util, only: [atomize: 1]
+  alias Braintree.HTTP
+  alias Braintree.CreditCard
+  alias Braintree.ErrorResponse, as: Error
   
-  def construct(map) do
-    struct(__MODULE__, atomize(map))
+  @doc """
+  Create a payment method record, or return an error response with after failed
+  validation.
+
+  ## Example
+
+      {:ok, customer} = Braintree.Customer.create(%{
+        first_name: "Jen",
+        last_name: "Smith"
+      })
+      
+      {:ok, credit_card} = Braintree.PaymentMethod.create(%{
+        customer_id: customer.id,
+        payment_method_nonce: Braintree.Testing.Nonces.transactable
+      })
+      
+      credit_card.type #Visa
+  """
+  @spec create(Map.t) :: {:ok, t} | {:error, Error.t}
+  def create(params \\ %{}) do
+    case HTTP.post("payment_methods", %{payment_method: params}) do
+      {:ok, %{"credit_card" => credit_card}} ->
+        {:ok, CreditCard.construct(credit_card)}
+      {:error, %{"api_error_response" => error}} ->
+        {:error, Error.construct(error)}
+    end
   end
 end

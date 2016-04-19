@@ -62,7 +62,7 @@ defmodule Braintree.Integration.TransactionTest do
       options: %{submit_for_settlement: true}
     })
     
-    {:ok, settle_transaction} = TestTransaction.settle(transaction.id)
+    {:ok, _} = TestTransaction.settle(transaction.id)
     {:ok, refund} = Transaction.refund(transaction.id, %{amount: "100.00"})
 
     assert refund.refunded_transaction_id =~ ~r/^\w+$/
@@ -84,5 +84,23 @@ defmodule Braintree.Integration.TransactionTest do
     {:error, error}  = Transaction.void("bogus")
     
     assert error.message == "Transaction ID is invalid."
+  end
+  
+  test "find/1 fails for invalid transaction id" do
+    {:error, error}  = Transaction.find("bogus")
+    
+    assert error.message == "Transaction ID is invalid."
+  end
+  
+  test "find/1 suceeds for existing transaction" do
+    {:ok, transaction} = Transaction.sale(%{
+      amount: "100.00",
+      payment_method_nonce: Nonces.paypal_one_time_payment
+    })
+    
+    {:ok, found_transaction}  = Transaction.find(transaction.id)
+    
+    assert found_transaction.status == transaction.status
+    assert found_transaction.amount == transaction.amount
   end
 end

@@ -94,7 +94,7 @@ defmodule Braintree.Transaction do
   ## Example
 
       {:ok, transaction} = Transaction.refund(
-      transaction_id: "123",
+      "123",
       %{
         amount: "100.00"
       })
@@ -116,13 +116,32 @@ defmodule Braintree.Transaction do
 
   ## Example
 
-      {:ok, transaction} = Transaction.void(transaction_id: "123")
+      {:ok, transaction} = Transaction.void("123")
 
       transaction.status # "voided"
   """
   @spec void(String.t) :: {:ok, any} | {:error, Error.t}
   def void(transaction_id) do
     case HTTP.put("transactions/#{transaction_id}/void", %{}) do
+      {:ok, %{"transaction" => transaction}} ->
+        {:ok, construct(transaction)}
+      {:error, %{"api_error_response" => error}} ->
+        {:error, Error.construct(error)}
+      {:error, :not_found} -> 
+        {:error, Error.construct(%{"message" => "Transaction ID is invalid."})}
+    end
+  end
+  
+  @doc """
+  Find an existing transaction by `transaction_id`
+
+  ## Example
+
+      {:ok, transaction} = Transaction.find("123")
+  """
+  @spec find(String.t) :: {:ok, any} | {:error, Error.t}
+  def find(transaction_id) do
+    case HTTP.get("transactions/#{transaction_id}") do
       {:ok, %{"transaction" => transaction}} ->
         {:ok, construct(transaction)}
       {:error, %{"api_error_response" => error}} ->
