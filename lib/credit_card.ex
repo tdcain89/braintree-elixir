@@ -59,10 +59,4 @@ defmodule Braintree.CreditCard do
             venmo_sdk:                "Unknown",
             subscriptions:            [],
             verifications:            []
-
-  import Braintree.Util, only: [atomize: 1]
-  
-  def construct(map) do
-    struct(__MODULE__, atomize(map))
-  end
 end

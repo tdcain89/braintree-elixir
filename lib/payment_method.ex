@@ -58,7 +58,8 @@ defmodule Braintree.PaymentMethod do
   alias Braintree.HTTP
   alias Braintree.CreditCard
   alias Braintree.ErrorResponse, as: Error
-  
+  import Braintree.Util, only: [atomize: 1]
+
   @doc """
   Create a payment method record, or return an error response with after failed
   validation.
@@ -81,7 +82,7 @@ defmodule Braintree.PaymentMethod do
   def create(params \\ %{}) do
     case HTTP.post("payment_methods", %{payment_method: params}) do
       {:ok, %{"credit_card" => credit_card}} ->
-        {:ok, CreditCard.construct(credit_card)}
+        {:ok, construct(credit_card)}
       {:error, %{"api_error_response" => error}} ->
         {:error, Error.construct(error)}
     end
@@ -116,7 +117,7 @@ defmodule Braintree.PaymentMethod do
   def update(token, params \\ %{}) do
     case HTTP.put("payment_methods/any/#{token}", %{payment_method: params}) do
       {:ok, %{"credit_card" => credit_card}} ->
-        {:ok, CreditCard.construct(credit_card)}
+        {:ok, construct(credit_card)}
       {:error, %{"api_error_response" => error}} ->
         {:error, Error.construct(error)}
       {:error, :not_found} -> 
@@ -157,11 +158,15 @@ defmodule Braintree.PaymentMethod do
   def find(token) do
     case HTTP.get("payment_methods/any/#{token}") do
       {:ok, %{"credit_card" => credit_card}} ->
-        {:ok, CreditCard.construct(credit_card)}
+        {:ok, construct(credit_card)}
       {:error, %{"api_error_response" => error}} ->
         {:error, Error.construct(error)}
       {:error, :not_found} -> 
         {:error, Error.construct(%{"message" => "Token is invalid."})}
     end
+  end
+
+  def construct(map) do
+    struct(__MODULE__, atomize(map))
   end
 end
