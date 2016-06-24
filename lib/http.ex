@@ -92,20 +92,23 @@ defmodule Braintree.HTTP do
     |> String.strip
     |> XML.load
   rescue
-    ErlangError -> Logger.error("unprocessable response")
+    ErlangError -> Logger.error("unprocessable response: #{body}")
+    :error
   end
 
   @doc false
-  def process_response({:ok, %{status_code: code, body: body}})
+  def process_response({:ok, %HTTPoison.Response{status_code: 401}}),
+    do: {:error, :unauthorized}
+  def process_response({:ok, %HTTPoison.Response{status_code: 404}}),
+    do: {:error, :not_found}
+  def process_response({:ok, %HTTPoison.Response{body: :error}}),
+    do: {:error, :error}
+  def process_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
       when code >= 200 and code <= 399,
     do: {:ok, body}
-  def process_response({:ok, %{status_code: 401}}),
-    do: {:error, :unauthorized}
-  def process_response({:ok, %{status_code: 404}}),
-    do: {:error, :not_found}
-  def process_response({:ok, %{body: body}}),
+  def process_response({:ok, %HTTPoison.Response{body: body}}),
     do: {:error, body}
-  def process_response({_code, %HTTPoison.Error{reason: reason}}),
+  def process_response({:ok, %HTTPoison.Error{reason: reason}}),
     do: {:error, inspect(reason)}
 
   ## Helpers

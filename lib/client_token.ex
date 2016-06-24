@@ -25,6 +25,8 @@ defmodule Braintree.ClientToken do
         {:ok, construct(client_token)}
       {:error, %{"api_error_response" => error}} ->
         {:error, Error.construct(error)}
+      {:error, _any} ->
+        {:error, Error.construct(%{"message" => "An error occurred."})}
     end
   end
 

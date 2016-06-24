@@ -34,6 +34,8 @@ defmodule Braintree.PaymentMethod do
         {:ok, PaypalAccount.construct(paypal_account)}
       {:error, %{"api_error_response" => error}} ->
         {:error, Error.construct(error)}
+      {:error, _any} ->
+        {:error, Error.construct(%{"message" => "An error occurred."})}
     end
   end
 
@@ -72,6 +74,8 @@ defmodule Braintree.PaymentMethod do
         {:error, Error.construct(error)}
       {:error, :not_found} ->
         {:error, Error.construct(%{"message" => "Token is invalid."})}
+      {:error, _any} ->
+        {:error, Error.construct(%{"message" => "An error occurred."})}
     end
   end
 
@@ -92,6 +96,8 @@ defmodule Braintree.PaymentMethod do
         {:error, Error.construct(error)}
       {:error, :not_found} ->
         {:error, Error.construct(%{"message" => "Token is invalid."})}
+      {:error, _any} ->
+        {:error, Error.construct(%{"message" => "An error occurred."})}
     end
   end
 
@@ -115,6 +121,8 @@ defmodule Braintree.PaymentMethod do
         {:error, Error.construct(error)}
       {:error, :not_found} ->
         {:error, Error.construct(%{"message" => "Token is invalid."})}
+      {:error, _any} ->
+        {:error, Error.construct(%{"message" => "An error occurred."})}
     end
   end
 end

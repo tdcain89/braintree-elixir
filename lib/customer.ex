@@ -72,6 +72,8 @@ defmodule Braintree.Customer do
         {:ok, construct(customer)}
       {:error, %{"api_error_response" => error}} ->
         {:error, Error.construct(error)}
+      {:error, _any} ->
+        {:error, Error.construct(%{"message" => "An error occurred."})}
     end
   end
 
@@ -95,6 +97,8 @@ defmodule Braintree.Customer do
         {:ok, construct(customer)}
       {:error, %{"api_error_response" => error}} ->
         {:error, Error.construct(error)}
+      {:error, _any} ->
+        {:error, Error.construct(%{"message" => "An error occurred."})}
     end
   end
 

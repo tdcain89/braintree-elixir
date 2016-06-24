@@ -55,8 +55,8 @@ defmodule Braintree.HTTPTest do
   end
 
   test "process_response/1 converts a error status into errors" do
-    assert HTTP.process_response({:ok, %{status_code: 401}}) == {:error, :unauthorized}
-    assert HTTP.process_response({:ok, %{status_code: 404}}) == {:error, :not_found}
+    assert HTTP.process_response({:ok, %HTTPoison.Response{status_code: 401}}) == {:error, :unauthorized}
+    assert HTTP.process_response({:ok, %HTTPoison.Response{status_code: 404}}) == {:error, :not_found}
   end
 
   test "basic_auth/2 encodes credentials" do

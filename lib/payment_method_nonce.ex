@@ -48,6 +48,8 @@ defmodule Braintree.PaymentMethodNonce do
         {:error, Error.construct(error)}
       {:error, :not_found} ->
         {:error, Error.construct(%{"message" => "Token is invalid."})}
+      {:error, _any} ->
+        {:error, Error.construct(%{"message" => "An error occurred."})}
     end
   end
 
@@ -69,6 +71,8 @@ defmodule Braintree.PaymentMethodNonce do
         {:error, Error.construct(error)}
       {:error, :not_found} ->
         {:error, Error.construct(%{"message" => "Token is invalid."})}
+      {:error, _any} ->
+        {:error, Error.construct(%{"message" => "An error occurred."})}
     end
   end
 end
