@@ -19,6 +19,9 @@ defmodule Braintree.XML.Decoder do
 
       iex> Braintree.XML.Decoder.load("<a><b type='string'>Jos&#233;</b></a>")
       %{"a" => %{"b" => "José"}}
+      
+      iex> Braintree.XML.Decoder.load("<a><b type='string'>First &amp; Last</b></a>")
+      %{"a" => %{"b" => "First & Last"}}
   """
   @spec load(xml) :: Map.t
   def load(""), do: %{}
@@ -55,7 +58,7 @@ defmodule Braintree.XML.Decoder do
     |> Enum.reject(&(&1 == ""))
     |> List.first
   end
-
+  
   defp transform(elements) when is_list(elements),
     do: Enum.into(without_nil(elements), %{}, &transform/1)
 
@@ -80,8 +83,13 @@ defmodule Braintree.XML.Decoder do
   defp transform({name, _, []}),
     do: {name, ""}
 
-  defp transform({name, _, values}),
-    do: {name, transform(values)}
+  defp transform({name, _, values}) do
+    try do
+      {name, Enum.join(values, " ")}
+    rescue 
+      _ -> {name, transform(values)}
+    end
+  end
 
   defp without_nil(list),
     do: Enum.reject(list, &Kernel.==(&1, nil))

@@ -14,9 +14,17 @@ defmodule Braintree.XML.Entity do
 
       iex> Braintree.XML.Entity.decode("Normal")
       "Normal"
+      
+      iex> Braintree.XML.Entity.decode("&amp;")
+      "&amp;"
   """
   def decode(string) do
+    string =
+      string
+      |> String.replace("&amp;", "[TEMP AMP REPLACEMENT]")
+    
     Regex.replace(~r/\&([^\s]+);/U, string, &replace/2)
+    |> String.replace("[TEMP AMP REPLACEMENT]", "&amp;")
   end
 
   @doc """
